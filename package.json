@@ -1,5 +1,5 @@
 {
-  "name": "pubtest",
+  "name": "@fbtmp/pubtest",
   "version": "1.0.0",
   "main": "index.js",
   "files": [],
