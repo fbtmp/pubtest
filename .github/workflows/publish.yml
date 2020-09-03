@@ -1,16 +1,40 @@
 name: publish
 on:
   push:
-    tags:
-      - v[0-9]+.[0-9]+.[0-9]+
+    tags: v[0-9]+.[0-9]+.[0-9]+
 jobs:
-  publish:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - run: git -c core.whitespace=fix,-indent-with-non-tab,trailing-space,cr-at-eol diff --check 4b825dc642cb6eb9a060e54bf8d69288fbee4904
+      - uses: actions/setup-node@v1
+        with:
+          node-version: 12
+      - run: yarn --frozen-lockfile
+  publish-npm:
+    needs: build
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-node@v1
         with:
-          registry-url: 'https://registry.npmjs.org'
+          node-version: 12
+          registry-url: https://registry.npmjs.org/
+      - run: yarn --frozen-lockfile
       - run: npm publish --access public
         env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          NODE_AUTH_TOKEN: ${{secrets.NPM_TOKEN}}
+  publish-gpr:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v1
+        with:
+          node-version: 12
+          registry-url: https://npm.pkg.github.com/
+      - run: yarn --frozen-lockfile
+      - run: npm publish --access public
+        env:
+          NODE_AUTH_TOKEN: ${{secrets.GITHUB_TOKEN}}
